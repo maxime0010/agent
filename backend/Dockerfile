@@ -16,6 +16,9 @@ COPY app/pyproject.toml app/poetry.lock* /code/
 # Install dependencies (ensure Alembic is installed)
 RUN poetry install --only main --no-root
 
+# Install required dependencies for Prisma
+RUN apk add --no-cache openssl1.1-compat
+
 # Set Python Path
 ENV PYTHONPATH=/code
 
