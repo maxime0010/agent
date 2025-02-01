@@ -7,7 +7,37 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml* ./
-RUN yarn global add pnpm && pnpm i --frozen-lockfile
+# Use Node.js 18 Alpine as base image
+FROM node:18-alpine
+
+# Enable Corepack (required for Yarn 2+ and PNPM)
+RUN corepack enable
+
+# Install required dependencies
+RUN apk add --no-cache libc6-compat
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and lock file
+COPY package.json pnpm-lock.yaml* ./
+
+# Install the correct Yarn & PNPM versions using Corepack
+RUN corepack prepare yarn@stable --activate && \
+    corepack prepare pnpm@latest --activate && \
+    pnpm install --frozen-lockfile
+
+# Add a non-root user for security
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
+
+# Set default user
+USER nextjs
+
+# Expose the Next.js port
+EXPOSE 3000
+
+# Start the Next.js app
+CMD ["pnpm", "run", "dev"]
 
 # Rebuild the source code only when needed
 FROM base AS builder
