@@ -14,7 +14,7 @@ ENV PATH="/root/.local/bin:$PATH"
 COPY app/pyproject.toml app/poetry.lock* /code/
 
 # Install dependencies (ensure Alembic is installed)
-RUN poetry install --no-root --no-dev
+RUN poetry install --only main --no-root
 
 # Set Python Path
 ENV PYTHONPATH=/code
